@@ -1,0 +1,3 @@
+[submodule "linStaticAeroModule/dAEDalusNXT"]
+	path = linStaticAeroModule/dAEDalusNXT
+	url = https://github.com/sbind/dAEDalusNXT.git
