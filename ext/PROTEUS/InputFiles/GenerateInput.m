@@ -39,9 +39,9 @@ IWW = AircraftData(3,4); % Initial guess for the wing weight to determine the gu
 %=========================================================================%
 % Maximum AOA allowed
 if ModellingInput(30,1)==1
-    alpha_max   = degtorad(ModellingInput(30,2));     % maximum AOA allowed
+    alpha_max   = deg2rad(ModellingInput(30,2));     % maximum AOA allowed
 else
-    alpha_max   = degtorad(15);     % maximum AOA allowed
+    alpha_max   = deg2rad(15);     % maximum AOA allowed
 end
 
 % Process wing data
@@ -50,7 +50,7 @@ xyz_LE_left      = xyz_LE_right.*repmat([1 -1 1],size(xyz_LE_right,1),1);
 xyz_LE_left(1,:) = []; 
 xyz_LE           = [flipud(xyz_LE_left); xyz_LE_right];
 
-theta_right = degtorad(wing_data(:,8));
+theta_right = deg2rad(wing_data(:,8));
 theta_left  = theta_right(2:end);
 theta       = [flipud(theta_left); theta_right];
 

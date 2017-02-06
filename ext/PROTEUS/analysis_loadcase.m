@@ -111,7 +111,7 @@ for i=1:mainloopsize
     constant2.general.nz = loadcase.nz(i);
     constant2.aero.V     = loadcase.EAS(i);
     constant2.aero.M     = loadcase.M(i);
-    constant2.aero.alpha0 = degtorad(loadcase.alpha0(i));              % initial angle of attack, overwritten by trim
+    constant2.aero.alpha0 = deg2rad(loadcase.alpha0(i));              % initial angle of attack, overwritten by trim
     constant2.general.TAS = eas2tas(loadcase.EAS(i),loadcase.H(i));
     
     if constant2.gust.type == 2
