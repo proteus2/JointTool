@@ -1,4 +1,4 @@
-classdef AeroModel
+classdef aeroModel < handle
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -13,6 +13,8 @@ classdef AeroModel
         grid
         %Forces in Body Fixed Frame
         F 
+        % colloc points
+        colloc
     end
     
     methods
@@ -30,6 +32,8 @@ classdef AeroModel
             obj.VLM=obj.VLM.update_nvec2(obj.geometry);
             %store grid for coupling algorithms
             obj.grid=obj.VLM.grid;
+            %store collocation point coordinates
+            obj.colloc=obj.VLM.colloc;
         end
         function obj=calculateForces(obj)
             %this function calculates the forces 
@@ -39,6 +43,12 @@ classdef AeroModel
         function obj=updateGrid(obj,gridIn)
             obj.geometry.grid_deflected=gridIn;
             obj.VLM=class_VLM_solver(obj.geometry.grid_deflected,obj.geometry.te_idx, obj.geometry.panels,obj.VLM.state, obj.geometry.reference);
+            % use nvec2 for normal vector correction
+            obj.VLM=obj.VLM.update_nvec2(obj.geometry);
+            %store grid for coupling algorithms
+            obj.grid=obj.VLM.grid;
+            %store collocation point coordinates
+            obj.colloc=obj.VLM.colloc;
         end
     end
     

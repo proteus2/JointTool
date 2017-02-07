@@ -1,4 +1,4 @@
-classdef structuralModel
+classdef structuralModel < handle
    properties 
       grid  
       Ks
