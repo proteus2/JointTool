@@ -18,7 +18,7 @@ classdef aeroModel < handle
     end
     
     methods
-        function obj=AeroModel(xmlFile, aeroState) %constructor
+        function obj=aeroModel(xmlFile, aeroState) %constructor
             %read geofile
             obj.geometry=class_aircraft(xmlFile,1);
             %aero grid settings
