@@ -50,6 +50,14 @@ classdef AeroModel
             %plots the computed grid
             obj.geometry.plot_grid();
         end
+        function plotGeo(obj)
+            %plots the geometry
+            obj.geometry.plot();
+        end
+        function plotGridVol(obj)
+            %plots the computed volume Grid
+            obj.geometry.plot_grid_vol();
+        end
         function plotCp(obj)
             %plots the computed grid
             obj.VLM.plot_cp();

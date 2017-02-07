@@ -89,7 +89,7 @@ fixnodes_left  = fixnodes_right(2:end);
 fixnodes       = [flipud(fixnodes_left); fixnodes_right];
 
 % xyzshift = [xyz(1,1);0;xyz(1,3)];
-xyzshift = xyz(xyz(:,2)==0,:);
+xyzshift = 0*xyz(xyz(:,2)==0,:);
     
 xyz_LE(:,1) = xyz_LE(:,1) - xyzshift(1);
 xyz_LE(:,3) = xyz_LE(:,3) - xyzshift(3);

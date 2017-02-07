@@ -14,18 +14,18 @@
         <WING NAME="MainWing" SYMMETRIC="1">
           <SEGMENT ID="1">
             <LOCATION>
-              <X>    0   </X>
+              <X>   3.40  </X>
               <Y>      0       </Y>
               <Z>    0  </Z>
             </LOCATION>
-            <DIHEDRAL> 6 </DIHEDRAL>
-            <LE_SWEEP>   35 </LE_SWEEP>
+            <DIHEDRAL> 6</DIHEDRAL>
+            <LE_SWEEP>   35.5 </LE_SWEEP>
             <SPAN> 4.41    </SPAN>
             <ROOT_CHORD>  13.60     </ROOT_CHORD>
             <TIP_CHORD> 11.06     </TIP_CHORD>
-            <ROOT_TWIST> 6.74   </ROOT_TWIST>
+            <ROOT_TWIST> 0  </ROOT_TWIST>
             <TIP_TWIST>   3.73  </TIP_TWIST>
-            <ROOT_PROFILE>crm1</ROOT_PROFILE>
+            <ROOT_PROFILE>naca0012</ROOT_PROFILE>
             <TIP_PROFILE> crm2    </TIP_PROFILE>
           </SEGMENT>
           <SEGMENT ID="2">
@@ -33,10 +33,10 @@
               <ATTACH_TO> previous  </ATTACH_TO>
             </LOCATION>
             <DIHEDRAL> 6 </DIHEDRAL>
-            <LE_SWEEP>   35 </LE_SWEEP>
+            <LE_SWEEP>   37.3 </LE_SWEEP>
             <SPAN>  5.88    </SPAN>
             <ROOT_CHORD> 11.06    </ROOT_CHORD>
-            <TIP_CHORD>  7.60    </TIP_CHORD>
+            <TIP_CHORD>  7.61    </TIP_CHORD>
             <ROOT_TWIST>   3.73  </ROOT_TWIST>
             <TIP_TWIST>  1.59  </TIP_TWIST>
             <ROOT_PROFILE>crm2</ROOT_PROFILE>
@@ -47,7 +47,7 @@
               <ATTACH_TO> previous  </ATTACH_TO>
             </LOCATION>
             <DIHEDRAL>  6 </DIHEDRAL>
-            <LE_SWEEP> 35   </LE_SWEEP>
+            <LE_SWEEP>  37.3 </LE_SWEEP>
             <SPAN> 4.41</SPAN>
             <ROOT_CHORD>   7.61    </ROOT_CHORD>
             <TIP_CHORD> 6.33 </TIP_CHORD>
@@ -61,7 +61,7 @@
               <ATTACH_TO> previous  </ATTACH_TO>
             </LOCATION>
             <DIHEDRAL>  6 </DIHEDRAL>
-            <LE_SWEEP> 35   </LE_SWEEP>
+            <LE_SWEEP>  37.3  </LE_SWEEP>
             <SPAN> 10.28			</SPAN>
             <ROOT_CHORD>   6.33    </ROOT_CHORD>
             <TIP_CHORD> 3.81</TIP_CHORD>
@@ -75,7 +75,7 @@
               <ATTACH_TO> previous  </ATTACH_TO>
             </LOCATION>
             <DIHEDRAL>  6 </DIHEDRAL>
-            <LE_SWEEP> 35   </LE_SWEEP>
+            <LE_SWEEP> 37.3  </LE_SWEEP>
             <SPAN> 4.41			</SPAN>
             <ROOT_CHORD>   3.81   </ROOT_CHORD>
             <TIP_CHORD> 2.73</TIP_CHORD>
