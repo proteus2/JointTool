@@ -36,6 +36,16 @@ classdef AeroModel
             obj.VLM=obj.VLM.f_solve_std;
             obj.F=obj.VLM.F_body;
         end
+        function obj=updateGrid(obj,gridIn)
+            obj.geometry.grid_deflected=gridIn;
+            obj.VLM=class_VLM_solver(obj.geometry.grid_deflected,obj.geometry.te_idx, obj.geometry.panels,obj.VLM.state, obj.geometry.reference);
+        end
+    end
+    
+    
+    
+    
+    methods %static
         function plotGrid(obj)
             %plots the computed grid
             obj.geometry.plot_grid();
@@ -43,9 +53,6 @@ classdef AeroModel
         function plotCp(obj)
             %plots the computed grid
             obj.VLM.plot_cp();
-        end
-        function obj=updateGrid(obj)
-            
         end
     end
     

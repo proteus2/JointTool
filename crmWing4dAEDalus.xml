@@ -1,0 +1,93 @@
+  <DAEDALUS>
+    <AIRCRAFT NAME="CRMWing">
+      <REFERENCE>
+        <AREA> 122.4</AREA>
+        <LENGTH> 10   </LENGTH>
+        <SPAN>    60    </SPAN>
+        <POINT>
+          <X>   4  </X>
+          <Y>  0.0       </Y>
+          <Z>   0.0</Z>
+        </POINT>
+      </REFERENCE>
+      <WINGS>
+        <WING NAME="MainWing" SYMMETRIC="1">
+          <SEGMENT ID="1">
+            <LOCATION>
+              <X>    0   </X>
+              <Y>      0       </Y>
+              <Z>    0  </Z>
+            </LOCATION>
+            <DIHEDRAL> 6 </DIHEDRAL>
+            <LE_SWEEP>   35 </LE_SWEEP>
+            <SPAN> 4.41    </SPAN>
+            <ROOT_CHORD>  13.60     </ROOT_CHORD>
+            <TIP_CHORD> 11.06     </TIP_CHORD>
+            <ROOT_TWIST> 6.74   </ROOT_TWIST>
+            <TIP_TWIST>   3.73  </TIP_TWIST>
+            <ROOT_PROFILE>crm1</ROOT_PROFILE>
+            <TIP_PROFILE> crm2    </TIP_PROFILE>
+          </SEGMENT>
+          <SEGMENT ID="2">
+            <LOCATION>
+              <ATTACH_TO> previous  </ATTACH_TO>
+            </LOCATION>
+            <DIHEDRAL> 6 </DIHEDRAL>
+            <LE_SWEEP>   35 </LE_SWEEP>
+            <SPAN>  5.88    </SPAN>
+            <ROOT_CHORD> 11.06    </ROOT_CHORD>
+            <TIP_CHORD>  7.60    </TIP_CHORD>
+            <ROOT_TWIST>   3.73  </ROOT_TWIST>
+            <TIP_TWIST>  1.59  </TIP_TWIST>
+            <ROOT_PROFILE>crm2</ROOT_PROFILE>
+            <TIP_PROFILE> crm3    </TIP_PROFILE>
+          </SEGMENT>
+          <SEGMENT ID="3">
+            <LOCATION>
+              <ATTACH_TO> previous  </ATTACH_TO>
+            </LOCATION>
+            <DIHEDRAL>  6 </DIHEDRAL>
+            <LE_SWEEP> 35   </LE_SWEEP>
+            <SPAN> 4.41</SPAN>
+            <ROOT_CHORD>   7.61    </ROOT_CHORD>
+            <TIP_CHORD> 6.33 </TIP_CHORD>
+            <ROOT_TWIST> 1.59  </ROOT_TWIST>
+            <TIP_TWIST> 0.53   </TIP_TWIST>
+            <ROOT_PROFILE>  crm3    </ROOT_PROFILE>
+            <TIP_PROFILE> crm4 </TIP_PROFILE>
+          </SEGMENT>
+          <SEGMENT ID="4">
+            <LOCATION>
+              <ATTACH_TO> previous  </ATTACH_TO>
+            </LOCATION>
+            <DIHEDRAL>  6 </DIHEDRAL>
+            <LE_SWEEP> 35   </LE_SWEEP>
+            <SPAN> 10.28			</SPAN>
+            <ROOT_CHORD>   6.33    </ROOT_CHORD>
+            <TIP_CHORD> 3.81</TIP_CHORD>
+            <ROOT_TWIST> 0.53 </ROOT_TWIST>
+            <TIP_TWIST> 0.68  </TIP_TWIST>
+            <ROOT_PROFILE>  crm4    </ROOT_PROFILE>
+            <TIP_PROFILE> crm5 </TIP_PROFILE>
+          </SEGMENT>
+          <SEGMENT ID="5">
+            <LOCATION>
+              <ATTACH_TO> previous  </ATTACH_TO>
+            </LOCATION>
+            <DIHEDRAL>  6 </DIHEDRAL>
+            <LE_SWEEP> 35   </LE_SWEEP>
+            <SPAN> 4.41			</SPAN>
+            <ROOT_CHORD>   3.81   </ROOT_CHORD>
+            <TIP_CHORD> 2.73</TIP_CHORD>
+            <ROOT_TWIST> 0.68 </ROOT_TWIST>
+            <TIP_TWIST> -0.65  </TIP_TWIST>
+            <ROOT_PROFILE>  crm5    </ROOT_PROFILE>
+            <TIP_PROFILE> crm6 </TIP_PROFILE>
+          </SEGMENT>
+          
+        </WING>
+        
+      </WINGS>
+
+    </AIRCRAFT>
+  </DAEDALUS>
