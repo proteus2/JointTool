@@ -8,19 +8,21 @@ addpath(genpath('ext'))
 addpath(genpath('linStaticAeroModule'))
 addpath(genpath('linStaticStrModule'))
 addpath(genpath('aeroStrModule'))
+addpath(genpath('C:\dAEDalus\dAEDalus_min2\dAEDalus\translator'))
 
 %% think about a way of putting states into an/another input file
 %                       U   aoa beta    Ma      rho
- state = class_aero_state(100, 10*pi/180, 0,      0.0,    1.225);
+ state = class_aero_state(100,0.17453*180/pi, 0,      0.0,    1.225);
 %% Setup Aero Model
 
-myAeroModel=aeroModel('crmWing4dAEDalus.xml',state);
+myAeroModel=aeroModel('rectangularWing4dAEDalus.xml',state);
 myAeroModel=myAeroModel.calculateForces();
-myAeroModel.plotCp();
-
 %% Setup Strutural Model
 % Class init.
-myStrModel = structuralModel('CRM');
+myStrModel = structuralModel('recBeam');
 
 %% Setup Aerostructural Model
- myAeroStructModel=aeroStrModel(myAeroModel,myStrModel);
+myAE=aeroElasticModeldAED(myAeroModel,myStrModel);
+ %%
+% Solve aerostruct Model
+myAE=myAE.solve();

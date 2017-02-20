@@ -1,0 +1,34 @@
+  <DAEDALUS>
+    <AIRCRAFT NAME="rectangularWing">
+      <REFERENCE>
+        <AREA> 80</AREA>
+        <LENGTH> 10   </LENGTH>
+        <SPAN>    60    </SPAN>
+        <POINT>
+          <X>   0.0  </X>
+          <Y>  0.0       </Y>
+          <Z>   0.0</Z>
+        </POINT>
+      </REFERENCE>
+      <WINGS>
+        <WING NAME="MainWing" SYMMETRIC="1">
+          <SEGMENT ID="1">
+            <LOCATION>
+              <X>2.5</X>
+              <Y>0</Y>
+              <Z>0</Z>
+            </LOCATION>
+            <DIHEDRAL> 0</DIHEDRAL>
+            <LE_SWEEP>   0 </LE_SWEEP>
+            <SPAN> 30    </SPAN>
+            <ROOT_CHORD>  10     </ROOT_CHORD>
+            <TIP_CHORD> 10    </TIP_CHORD>
+            <ROOT_TWIST> 0  </ROOT_TWIST>
+            <TIP_TWIST>  0 </TIP_TWIST>
+            <ROOT_PROFILE>naca0012</ROOT_PROFILE>
+            <TIP_PROFILE> naca0012   </TIP_PROFILE>
+          </SEGMENT>
+        </WING>
+       </WINGS>
+    </AIRCRAFT>
+  </DAEDALUS>
