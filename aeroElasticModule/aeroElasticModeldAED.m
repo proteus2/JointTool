@@ -27,8 +27,8 @@ classdef aeroElasticModeldAED < aeroElasticModel
             obj.dummyDaedStr.settings.landing_gear=0;
             
             obj.dummyDaedStr.beam(1).epsilon=zeros(size(obj.strModel.grid,1),1);
-            obj.dummyDaedStr.beam(1).dist_c4_sc=zeros(size(obj.strModel.grid,1),1);
             %Rectangular
+            obj.dummyDaedStr.beam(1).dist_c4_sc=2.5*ones(size(obj.strModel.grid,1),1);
             obj.aeroModel.geometry.wings(1).wingbox_coords=repmat(obj.strModel.grid(31:end,:)',1,1,2);
             obj.aeroModel.geometry.wings(1).wingbox_coords=repmat(obj.strModel.grid(31:end,:)',1,1,2);
             obj.aeroModel.geometry.wings(1).wing_segments(1).wingbox_coords=repmat(obj.strModel.grid(31:end,:)',1,1,2);
