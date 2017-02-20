@@ -7,8 +7,7 @@ clc
 addpath(genpath('ext'))
 addpath(genpath('linStaticAeroModule'))
 addpath(genpath('linStaticStrModule'))
-addpath(genpath('aeroStrModule'))
-addpath(genpath('C:\dAEDalus\dAEDalus_min2\dAEDalus\translator'))
+addpath(genpath('aeroElasticModule'))
 
 %% think about a way of putting states into an/another input file
 %                       U   aoa beta    Ma      rho
