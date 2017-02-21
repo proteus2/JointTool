@@ -1,18 +1,17 @@
-function varargout = strModule(model)
+function varargout = genStrModel(model)
 
 curdir = cd;
 
 % Specify number of computational threads, note should not be greater than
 % specified in the pbs script ()
-% if isempty(gcp('nocreate'))
-%     parpool(2,'IdleTimeout', 300);
-% end
+if isempty(gcp('nocreate'))
+    parpool(2,'IdleTimeout', 300);
+end
 
 global GRAPHFLAG xlsFileName
 
 addpath(genpath([cd,'/ext/PROTEUS/InBuildCommands']));
 
-% model = 'CRM'; % ['CRM' 'RecBeam']
 % --- Inputs
 xlsFileName = ['input_',model,'/',model,'_Input.xlsx'];
 

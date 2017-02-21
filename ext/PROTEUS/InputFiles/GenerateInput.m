@@ -48,7 +48,7 @@ end
 xyz_LE_right_0   = wing_data(:,[3,2,4]);
 
 % Apply dihedral (put as input)
-Lambda = 6; % degrees
+Lambda = 0; % degrees
 Rdih   = [1 0 0; 0 cosd(Lambda) -sind(Lambda); 0 sind(Lambda) cosd(Lambda)];
 
 xyz_LE_right = (Rdih*(xyz_LE_right_0 - repmat(xyz_LE_right_0(1,:),size(xyz_LE_right_0,1),1))')' + repmat(xyz_LE_right_0(1,:),size(xyz_LE_right_0,1),1);
@@ -235,7 +235,7 @@ end
 
 fext = [];
 [fext] = AddExternalForces(fext,xyzshift,constant,'right');
-[fext] = AddExternalForces(fext,xyzshift,constant,'left');
+[fext] = AddExternalForces(fext,xyzshift,constant,'left'); 
 [fext] = shiftFEXT(fext,xyzshift,str);
 
 %=========================================================================%

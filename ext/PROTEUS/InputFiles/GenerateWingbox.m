@@ -28,11 +28,11 @@ sparloc_right = wing_data(:,12:end);
 sparloc_left  = sparloc_right(2:end,:);
 sparloc_vec   = [flipud(sparloc_left); sparloc_right];
  
-% c_str_0 = (wb_te - wb_le).*c;
-% c_str   = interp1(xyz(:,2),c_str_0,str.xyz(2:3:end),'linear');
-%  
-% % store str chord values
-% constant.inp.cbox = c_str;
+c_str_0 = (wb_te - wb_le).*c;
+c_str   = interp1(xyz(:,2),c_str_0,str.xyz(2:3:end),'linear');
+ 
+% store str chord values
+constant.inp.cbox = c_str;
 
 % In case of span extension
 if morphflag == 1 && morph.inp.span.flag == 1
@@ -145,10 +145,13 @@ for i=1:nsec
             end
         end
         
-        Nupper = size(constant.inp.Aerofoil.NodeProfilesUpper{IndexProfile1},1);
-        WB_Z_Upper{i} = interp1(x_twisted(1:Nupper),z_twisted(1:Nupper),WB_X{i},'PCHIP');             % normalised WB upper Z coord.
-        WB_Z_Lower{i} = interp1(x_twisted(Nupper+1:end),z_twisted(Nupper+1:end),flipud(WB_X{i}),'PCHIP');     % normalised WB lower Z coord.
+%         Nupper = size(constant.inp.Aerofoil.NodeProfilesUpper{IndexProfile1},1);
+%         WB_Z_Upper{i} = interp1(x_twisted(1:Nupper),z_twisted(1:Nupper),WB_X{i},'PCHIP');             % normalised WB upper Z coord.
+%         WB_Z_Lower{i} = interp1(x_twisted(Nupper+1:end),z_twisted(Nupper+1:end),flipud(WB_X{i}),'PCHIP');     % normalised WB lower Z coord.
         
+        % Normalized height (rectangular section)
+        WB_Z_Upper{i} = 0.05*ones(size(WB_X{i}));
+        WB_Z_Lower{i} = -0.05*ones(size(WB_X{i}));
         
         cross.yzlocal{i}{1} = unique([WB_X{i},WB_Z_Upper{i};flipud(WB_X{i}),WB_Z_Lower{i}],'rows','stable');
         

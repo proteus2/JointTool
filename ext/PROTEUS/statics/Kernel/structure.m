@@ -103,9 +103,10 @@ for i=1:Ne
     dof2 = constant.str.EFT(i,7:12);
     
     p       = [statics.str.p((i-1)*6+(1:6));statics.str.p(i*6+(1:6))];
-    
+       
     C1 = statics.str.C((i-1)*6+(1:6),:);
     C2 = C1;
+    
     Ro = constant.str.R0((i-1)*3+(1:3),:);
     
     if morphflag == 1
@@ -160,6 +161,9 @@ for i=1:Ne
         [ft,Kt,rei,Kli,pdC1_Kt,pdC1_ft,pdC2_Kt,pdC2_ft,dp_Kt,dp_ft,pdC1_rei,pdC2_rei,dp_rei,dC1_Kli,dC2_Kli] = elem3d(x,p,C1,C2,Ro,ders,tailflag);
     end
    
+    % Store element stiffness matrix
+    statics.str.elmStiffMat{i} = Kt;
+    
     Fs([dof1';dof2']) = Fs([dof1';dof2'])+ft;
     Ks([dof1';dof2'],[dof1';dof2']) = Ks([dof1';dof2'],[dof1';dof2'])+Kt;
     re = [re;rei];

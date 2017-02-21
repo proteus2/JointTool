@@ -1,24 +1,29 @@
-classdef structuralModel < handle
+classdef structuralModel
    properties 
       grid  
+      disp
+      Fs
+      settings = strModelSettings();
+   end
+   properties (SetAccess = protected)
+      Fext
+   end
+   properties (Access = private)
       Ks
       Kfext
-      Fs
-      Fext
-      p
       frdof
-      fxdof
+      fxdof 
    end
-   methods
+   methods % Constructor
        function obj = structuralModel(model)
-           [constant,~,~,~,statics] = strModule(model);
+           [constant,~,~,~,statics] = genStrModel(model);
            % Extract properties
            obj.grid  = reshape(constant{1}.str.xyz,3,constant{1}.str.Ns+1)';
            obj.Ks    = statics{1}.str.Ks;
            obj.Kfext = statics{1}.str.Kfext;
-           obj.Fs    = reshape(statics{1}.str.Fs,6,constant{1}.str.Ns+1)';
-           obj.Fext  = reshape(statics{1}.str.Fext,6,constant{1}.str.Ns+1)';
-           obj.p     = reshape(statics{1}.str.p,6,constant{1}.str.Ns+1)';
+           obj.Fs    = statics{1}.str.Fs;
+           obj.Fext  = statics{1}.str.Fext;
+           obj.disp  = statics{1}.str.p;
            obj.frdof = constant{1}.str.frdof;
            obj.fxdof = constant{1}.str.fxdof;
            obj.fxdof = constant{1}.str.fxdof;
@@ -28,12 +33,22 @@ classdef structuralModel < handle
            save('constant.mat','constant')
            cd(curdir)
        end
-       function obj = solve(obj,F)
+   end
+   methods % Set
+       function obj = set.Fext(obj,Fext)
+           obj.Fext = Fext;
+       end
+   end
+   methods % Solution
+       function obj = solve(obj)
            % Format 
            % (Nx, Ny, Nz, Mx, My, Mz)_per node
-           obj.p = obj.Ks(obj.frdof,obj.frdof)\F(obj.frdof,1);
+           obj.disp = [];
+           obj.disp(obj.frdof,1) = obj.Ks(obj.frdof,obj.frdof)\obj.Fs(obj.frdof,1);
        end
-       function obj = plot(obj,varargin)
+   end
+   methods % Graphics
+       function obj = plotGridVol(obj,varargin)
            load('constant');
            if isempty(varargin)
                plotBeamElements(constant{1})
@@ -48,21 +63,80 @@ classdef structuralModel < handle
                colormap(ax1,'hot');
            end
        end
-       function obj = plotT3(obj)
-           figure()
+       function obj = plotGrid(obj,varargin)
+           % Determine figure ID
+           load('constant');
+           if ~isempty(varargin)
+               fID = varargin{1};
+               figure(fID)
+           end
            hold on
-           grid on
-           plot(obj.grid(:,2),obj.p(:,3),'k');
-           xlabel('Span [m]')
-           ylabel('Vertical Displacement [m]')
+           % Extract properties
+           P0 = obj.grid;
+           C  = constant{1}.inp.cbox;
+           % Beam axis
+           plot3(P0(:,1),P0(:,2),P0(:,3),...
+                 'ro-','LineWidth',2,'MarkerFaceColor',[1 0 0]);
+           % Fish bones (visual aid for rotations)
+           Null = zeros(constant{1}.str.Ns+1,1);
+           xref = constant{1}.inp.xref;
+           LE = P0 + [xref   Null Null].*[C Null Null];
+           TE = P0 + [xref-1 Null Null].*[C Null Null];
+           for i=1:constant{1}.str.Ns+1
+               plot3([LE(i,1), P0(i,1)],...
+                     [LE(i,2), P0(i,2)],...
+                     [LE(i,3), P0(i,3)],'g.-');
+               plot3([TE(i,1), P0(i,1)],...
+                     [TE(i,2), P0(i,2)],...
+                     [TE(i,3), P0(i,3)],'g.-');
+           end
+           % Axes properties
+           xlabel('Chord [m]')
+           ylabel('Span [m]')
+           zlabel('Height [m]')
+           view(-50,25)
+           axis equal
        end
-       function obj = plotR2(obj)
-           figure()
+       function obj = plotGridDef(obj,varargin)
+           % Determine figure ID
+           load('constant');
+           if ~isempty(varargin)
+               fID = varargin{1};
+               figure(fID)
+           end
            hold on
-           grid on
-           plot(obj.grid(:,2),rad2deg(obj.p(:,5)),'k')
-           xlabel('Span [m]')
-           ylabel('Torsional Deflection [deg]')
+           % Extract properties
+           P0 = obj.grid;
+           P  = obj.disp;
+           if size(P,2)==1
+              P = reshape(P,6,constant{1}.str.Ns+1)'; 
+           end
+           C  = constant{1}.inp.cbox;
+           % Deformed beam axis
+           plot3(P0(:,1)+P(:,1),...
+                 P0(:,2)+P(:,2),...
+                 P0(:,3)+P(:,3),'ro-','LineWidth',2,'MarkerFaceColor',[1 0 0]);
+           % Fish bones (visual aid for rotations)
+           Null = zeros(constant{1}.str.Ns+1,1);
+           LE =   0.5*[C Null Null];
+           TE = - 0.5*[C Null Null];
+           for i=1:constant{1}.str.Ns+1
+               R = expon(P(i,4:6));
+               LErot = (R*LE(i,:)')' + P0(i,:) + P(i,1:3);
+               TErot = (R*TE(i,:)')' + P0(i,:) + P(i,1:3);
+               plot3([LErot(:,1), P0(i,1)+P(i,1)],...
+                     [LErot(:,2), P0(i,2)+P(i,2)],...
+                     [LErot(:,3), P0(i,3)+P(i,3)],'g.-');
+               plot3([TErot(:,1), P0(i,1)+P(i,1)],...
+                     [TErot(:,2), P0(i,2)+P(i,2)],...
+                     [TErot(:,3), P0(i,3)+P(i,3)],'g.-');
+           end
+           % Axes properties
+           xlabel('Chord [m]')
+           ylabel('Span [m]')
+           zlabel('Height [m]')
+           view(-50,25)
+           axis equal
        end
    end
 end

@@ -22,7 +22,13 @@ Wing_TE_xyz(:,3) = Wing_TE_xyz(:,3)+xyzshift(3);
 txt       = txt(2:end,1);
 
 for i = 1:length(txt)
-    EntryNum                  = i;
+    
+    if isfield(fext,'type')
+        EntryNum = length(fext.type)+1;
+    else
+        EntryNum = 1;
+    end
+    
     fext.type{EntryNum}       = txt{i};
     fext.magnitude{EntryNum}  = Num(i,1:6); 
     Xloc = Num(i,7);

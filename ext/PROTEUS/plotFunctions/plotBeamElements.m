@@ -56,8 +56,13 @@ for j=1:constant.str.Ns
     crossyz = constant.cross.yzlocal{j}{1};
     crossxyz = constant.str.R0(3*(j-1)+(1:3),:)*[zeros(1,size(crossyz,1));crossyz'];
     
-    crossloc = constant.cross.elmloc{j}{1}(1:size(constant.cross.lam{j}{1}(constant.cross.lam{j}{1}~=constant.stringer.lamID(j)),1),:);
-    crosslam = constant.cross.lam{j}{1}(constant.cross.lam{j}{1}~=constant.stringer.lamID(j));
+    if isfield(constant,'stringer')
+        crossloc = constant.cross.elmloc{j}{1}(1:size(constant.cross.lam{j}{1}(constant.cross.lam{j}{1}~=constant.stringer.lamID(j)),1),:);
+        crosslam = constant.cross.lam{j}{1}(constant.cross.lam{j}{1}~=constant.stringer.lamID(j));
+    else
+        crossloc = constant.cross.elmloc{j}{1}(1:size(constant.cross.lam{j}{1},1),:);
+        crosslam = constant.cross.lam{j}{1};
+    end
     
     for i=1:size(crossloc,1)
         if lamvec(crosslam(i))==1
@@ -91,7 +96,6 @@ colormap('jet')
 colormap(flipud(colormap))
 
 % Labels
-% axis equal
 xlabel('Chord [m]')
 ylabel('Span [m]')
 zlabel('Height [m]')

@@ -123,7 +123,7 @@ else
     statics.str.alpha = constant.aero.alpha0;
 end
 
-statics2 = strSolve(constant,statics,Vi,constant.aero.V,statics.str.alpha,ders,lin,tailflag);
+statics2 = solveStrModel(constant,statics,Vi,constant.aero.V,statics.str.alpha,ders,lin,tailflag);
 
 cd('../Postprocessor')
 statics3 = mr(constant,statics2,ders,tailflag,morphflag);
@@ -135,93 +135,96 @@ if grav == 1
     statics3 = rmfield(statics3,'cross');
 end
 
-if constant.general.romflag ~= 2
-    
-    if constant.cross.numel ~= 0
-        % Strain computation
-        cd('ext/PROTEUS/strain')
-        [straindat,strainraw] = strain_comp_single_gust_fail_index(constant,crossmod,statics3,[],ders,gustflag,tailflag);
-        strain.exmax = straindat.exmax;
-        strain.exmin = straindat.exmin;
-        strain.gammamax = straindat.gammamax;
-        strain.rcrit = straindat.rcrit;
-        strain.exmax_full{1} = straindat.exmax_full;
-        strain.exmin_full{1} = straindat.exmin_full;
-        strain.gamma_full{1} = straindat.gamma_full;
-        strain.r_full{1} = straindat.r_full;
-        strain.locemax{1} = straindat.locemax;
-        strain.locemin{1} = straindat.locemin;
-        strain.locgmax{1} = straindat.locgmax;
-        strain.locrcrit{1} = straindat.locrcrit;
-        strain.node1{1} = straindat.node1;
-        strain.node2{1} = straindat.node2;
-        fprintf('\n Strain ;')
-        cd(curdir)
-        
-        % Buckling computation
-        if constant.opt.BucklConst
-            if feas == 0
-                buckl.r = 2*ones(8*constant.opt.constraint.BucklPerLam*length(constant.lam.ID),1);
-            else
-                cd('buckling')
-                constant2.buckl = constant.buckl;
-                constant2.str = constant.str;
-                constant2.lam = constant.lam;
-                constant2.opt.constraint.BucklPerLam = constant.opt.constraint.BucklPerLam;
-                Numcross = crossmod.Numcross;
-                parfor i = 1
-                    [buckldat{i}] = buckl_comp_single_gust(constant2,lampar,Numcross,strainraw,ders,gustflag,tailflag);
-                end
-                buckl.r = buckldat{1}.r;
-                buckl.rfull{1} = buckldat{1}.rfull;
-                buckl.pan{1} = buckldat{1}.pan;
-                buckl.sec{1} = buckldat{1}.sec;
-                buckl.cross{1} = buckldat{1}.cross;
-                fprintf('\n Buckling ;')
-                cd(curdir)
-            end
-        end
-        
-        % Objective and constraints
-        if feas == 0
-            g.exmax = repmat(strain.exmax,ngust,1);
-            g.exmin = repmat(strain.exmin,ngust,1);
-            g.gammamax = repmat(strain.gammamax,ngust,1);
-            g.strainrcrit = repmat(strain.rcrit,ngust,1);
-            if constant.opt.BucklConst
-                g.buckl = repmat(buckl.r,ngust,1);
-            end
-        else
-            g.exmax = strain.exmax;
-            g.exmin = strain.exmin;
-            g.gammamax = strain.gammamax;
-            g.strainrcrit = strain.rcrit;
-            if constant.opt.BucklConst
-                g.buckl = buckl.r;
-            end
-        end
-        
-        obj.mass  = mass;
-        
-    else
-        strain = [];
-        buckl = [];
-    end
-end
+% Quick fix
+% Buckling and strain computation should be implemented as external
+% function in the class strModel. (ADJUST A.S.A.P.)
+% if constant.general.romflag ~= 2
+%     
+%     if constant.cross.numel ~= 0
+%         % Strain computation
+%         cd('ext/PROTEUS/strain')
+%         [straindat,strainraw] = strain_comp_single_gust_fail_index(constant,crossmod,statics3,[],ders,gustflag,tailflag);
+%         strain.exmax = straindat.exmax;
+%         strain.exmin = straindat.exmin;
+%         strain.gammamax = straindat.gammamax;
+%         strain.rcrit = straindat.rcrit;
+%         strain.exmax_full{1} = straindat.exmax_full;
+%         strain.exmin_full{1} = straindat.exmin_full;
+%         strain.gamma_full{1} = straindat.gamma_full;
+%         strain.r_full{1} = straindat.r_full;
+%         strain.locemax{1} = straindat.locemax;
+%         strain.locemin{1} = straindat.locemin;
+%         strain.locgmax{1} = straindat.locgmax;
+%         strain.locrcrit{1} = straindat.locrcrit;
+%         strain.node1{1} = straindat.node1;
+%         strain.node2{1} = straindat.node2;
+%         fprintf('\n Strain ;')
+%         cd(curdir)
+%         
+%         % Buckling computation
+%         if constant.opt.BucklConst
+%             if feas == 0
+%                 buckl.r = 2*ones(8*constant.opt.constraint.BucklPerLam*length(constant.lam.ID),1);
+%             else
+%                 cd('buckling')
+%                 constant2.buckl = constant.buckl;
+%                 constant2.str = constant.str;
+%                 constant2.lam = constant.lam;
+%                 constant2.opt.constraint.BucklPerLam = constant.opt.constraint.BucklPerLam;
+%                 Numcross = crossmod.Numcross;
+%                 parfor i = 1
+%                     [buckldat{i}] = buckl_comp_single_gust(constant2,lampar,Numcross,strainraw,ders,gustflag,tailflag);
+%                 end
+%                 buckl.r = buckldat{1}.r;
+%                 buckl.rfull{1} = buckldat{1}.rfull;
+%                 buckl.pan{1} = buckldat{1}.pan;
+%                 buckl.sec{1} = buckldat{1}.sec;
+%                 buckl.cross{1} = buckldat{1}.cross;
+%                 fprintf('\n Buckling ;')
+%                 cd(curdir)
+%             end
+%         end
+%         
+%         % Objective and constraints
+%         if feas == 0
+%             g.exmax = repmat(strain.exmax,ngust,1);
+%             g.exmin = repmat(strain.exmin,ngust,1);
+%             g.gammamax = repmat(strain.gammamax,ngust,1);
+%             g.strainrcrit = repmat(strain.rcrit,ngust,1);
+%             if constant.opt.BucklConst
+%                 g.buckl = repmat(buckl.r,ngust,1);
+%             end
+%         else
+%             g.exmax = strain.exmax;
+%             g.exmin = strain.exmin;
+%             g.gammamax = strain.gammamax;
+%             g.strainrcrit = strain.rcrit;
+%             if constant.opt.BucklConst
+%                 g.buckl = buckl.r;
+%             end
+%         end
+%         
+%         obj.mass  = mass;
+%         
+%     else
+%         strain = [];
+%         buckl = [];
+%     end
+% end
 
-if constant.opt.BucklConst
-	constant.buckl = rmfield(constant.buckl,'stiff');
-end
+% if constant.opt.BucklConst
+% 	constant.buckl = rmfield(constant.buckl,'stiff');
+% end
 
 if outflag == 1
     varargout{1} = constant;
     varargout{2} = statics3;
-    if constant.general.romflag ~= 2
-        varargout{3} = strain;
-        if constant.opt.BucklConst
-            varargout{4} = buckl;
-        end
-    end
+%     if constant.general.romflag ~= 2
+%         varargout{3} = strain;
+%         if constant.opt.BucklConst
+%             varargout{4} = buckl;
+%         end
+%     end
 else
     varargout{1} = statics3.str.p;
     varargout{2} = statics3.str.alpha;

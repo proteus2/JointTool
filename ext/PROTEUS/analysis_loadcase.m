@@ -74,34 +74,33 @@ end
 %% ---
 for i=1:mainloopsize
     
-    
-    if ANALYSISTYPE == 2 || ANALYSISTYPE == 3
-        if isfield(constant.morph,'camber')
-            dvLoad.paramstart = dvFull.camber.paramstart(:,i);
-            dvLoad.paramini = dvFull.camber.paramini(:,i);
-            dvLoad.paramfin = dvFull.camber.paramfin(:,i);
-        end
-        if isfield(constant.morph,'shear')
-            dvLoad.psistart = dvFull.shear.psistart(:,i);
-            dvLoad.psiini = dvFull.shear.psiini(:,i);
-            dvLoad.psifin = dvFull.shear.psifin(:,i);
-        end
-        if isfield(constant.morph,'fold')
-            dvLoad.thetastart = dvFull.fold.thetastart(:,i);
-            dvLoad.thetaini = dvFull.fold.thetaini(:,i);
-            dvLoad.thetafin = dvFull.fold.thetafin(:,i);
-        end
-        if isfield(constant.morph,'twist')
-            dvLoad.phistart = dvFull.twist.phistart(:,i);
-            dvLoad.phiini = dvFull.twist.phiini(:,i);
-            dvLoad.phifin = dvFull.twist.phifin(:,i);
-        end
-        if isfield(constant.morph,'span')
-            dvLoad.extstart = dvFull.span.extstart(:,i);
-            dvLoad.extini = dvFull.span.extini(:,i);
-            dvLoad.extfin = dvFull.span.extfin(:,i);
-        end
-    end
+%     if ANALYSISTYPE == 2 || ANALYSISTYPE == 3
+%         if isfield(constant.morph,'camber')
+%             dvLoad.paramstart = dvFull.camber.paramstart(:,i);
+%             dvLoad.paramini = dvFull.camber.paramini(:,i);
+%             dvLoad.paramfin = dvFull.camber.paramfin(:,i);
+%         end
+%         if isfield(constant.morph,'shear')
+%             dvLoad.psistart = dvFull.shear.psistart(:,i);
+%             dvLoad.psiini = dvFull.shear.psiini(:,i);
+%             dvLoad.psifin = dvFull.shear.psifin(:,i);
+%         end
+%         if isfield(constant.morph,'fold')
+%             dvLoad.thetastart = dvFull.fold.thetastart(:,i);
+%             dvLoad.thetaini = dvFull.fold.thetaini(:,i);
+%             dvLoad.thetafin = dvFull.fold.thetafin(:,i);
+%         end
+%         if isfield(constant.morph,'twist')
+%             dvLoad.phistart = dvFull.twist.phistart(:,i);
+%             dvLoad.phiini = dvFull.twist.phiini(:,i);
+%             dvLoad.phifin = dvFull.twist.phifin(:,i);
+%         end
+%         if isfield(constant.morph,'span')
+%             dvLoad.extstart = dvFull.span.extstart(:,i);
+%             dvLoad.extini = dvFull.span.extini(:,i);
+%             dvLoad.extfin = dvFull.span.extfin(:,i);
+%         end
+%     end
     
 %     fprintf('\n ==== Loadcase #%i ',i)
     
@@ -168,9 +167,11 @@ for i=1:mainloopsize
     if outflag == 1
         if constant.general.romflag ~= 2
             if constant.opt.BucklConst
-                [constantOut{i},statics{i},strain{i},buckl{i}] = analysis_crossmod(constant2,lampar,crossmod,dvLoad,Vi,dispi,alphai,ANALYSISTYPE,LIN,loadcase.trim(i),TRIMDEF,GRAV,DERS,FEAS,outflag,loadcase.gustflag(i));
+%                 [constantOut{i},statics{i},strain{i},buckl{i}] = analysis_crossmod(constant2,lampar,crossmod,dvLoad,Vi,dispi,alphai,ANALYSISTYPE,LIN,loadcase.trim(i),TRIMDEF,GRAV,DERS,FEAS,outflag,loadcase.gustflag(i));
+                [constantOut{i},statics{i}] = analysis_crossmod(constant2,lampar,crossmod,dvLoad,Vi,dispi,alphai,ANALYSISTYPE,LIN,loadcase.trim(i),TRIMDEF,GRAV,DERS,FEAS,outflag,loadcase.gustflag(i));
             else
-                [constantOut{i},statics{i},strain{i}] = analysis_crossmod(constant2,lampar,crossmod,dvLoad,Vi,dispi,alphai,ANALYSISTYPE,LIN,loadcase.trim(i),TRIMDEF,GRAV,DERS,FEAS,outflag,loadcase.gustflag(i));
+%                 [constantOut{i},statics{i},strain{i}] = analysis_crossmod(constant2,lampar,crossmod,dvLoad,Vi,dispi,alphai,ANALYSISTYPE,LIN,loadcase.trim(i),TRIMDEF,GRAV,DERS,FEAS,outflag,loadcase.gustflag(i));
+                [constantOut{i},statics{i}] = analysis_crossmod(constant2,lampar,crossmod,dvLoad,Vi,dispi,alphai,ANALYSISTYPE,LIN,loadcase.trim(i),TRIMDEF,GRAV,DERS,FEAS,outflag,loadcase.gustflag(i));
             end
         else
             [constantOut{i},statics{i}] = analysis_crossmod(constant2,lampar,crossmod,dvLoad,Vi,dispi,alphai,ANALYSISTYPE,LIN,loadcase.trim(i),TRIMDEF,GRAV,DERS,FEAS,outflag,loadcase.gustflag(i));

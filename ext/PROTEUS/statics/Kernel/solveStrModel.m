@@ -1,4 +1,4 @@
-function [statics,exitflag] = strSolve(constant,statics,Vi,Vf,alphar,ders,lin,tailflag,varargin)
+function [statics,exitflag] = solveStrModel(constant,statics,Vi,Vf,alphar,ders,lin,tailflag,varargin)
 
 morphflag = 0;
 

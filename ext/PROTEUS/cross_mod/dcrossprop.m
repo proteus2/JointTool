@@ -39,6 +39,15 @@ mI33 = sum(rho.*I33loc+rho.*Aloc.*(loc23(:,1)).^2);
 mI23 = sum(rho.*I23loc+rho.*Aloc.*(loc23(:,1)).*(loc23(:,2)));
 mI11 = mI22+mI33;
 
+% Adjust for finite length
+% L  = 1;
+% Y0 = - L/2;
+% Y1 =   L/2;
+% mI11 = 1/3*sum(rho.*Aloc)*(Y1^3-Y0^3) + mI11*L;
+% mI22 = 2/3*sum(rho.*Aloc)*(Y1^3-Y0^3) + mI22*L;
+% mI33 = 1/3*sum(rho.*Aloc)*(Y1^3-Y0^3) + mI33*L;
+% mI23 = -mI23*L;
+
 if ders == 1
     dmQ2dt = loc23(:,2).*dmAdt;
     dmQ3dt = loc23(:,1).*dmAdt;
