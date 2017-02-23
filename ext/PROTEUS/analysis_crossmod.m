@@ -123,7 +123,7 @@ else
     statics.str.alpha = constant.aero.alpha0;
 end
 
-statics2 = solveStrModel(constant,statics,Vi,constant.aero.V,statics.str.alpha,ders,lin,tailflag);
+statics2 = calculateStiffness(constant,statics,ders,tailflag);
 
 cd('../Postprocessor')
 statics3 = mr(constant,statics2,ders,tailflag,morphflag);

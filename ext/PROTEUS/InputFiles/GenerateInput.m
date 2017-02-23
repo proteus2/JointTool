@@ -47,11 +47,13 @@ end
 % Process wing data
 xyz_LE_right_0   = wing_data(:,[3,2,4]);
 
-% Apply dihedral (put as input)
-Lambda = 0; % degrees
+% Apply sweep and/or dihedral (put as input)
+Gamma  = 0; % SWEEP [degrees] 
+Lambda = 0; % DIHEDRAL [degrees]
+Rgam   = [cosd(Gamma) -sind(Gamma) 0; sind(Gamma) cosd(Gamma) 0; 0 0 1];
 Rdih   = [1 0 0; 0 cosd(Lambda) -sind(Lambda); 0 sind(Lambda) cosd(Lambda)];
 
-xyz_LE_right = (Rdih*(xyz_LE_right_0 - repmat(xyz_LE_right_0(1,:),size(xyz_LE_right_0,1),1))')' + repmat(xyz_LE_right_0(1,:),size(xyz_LE_right_0,1),1);
+xyz_LE_right = (Rdih*Rgam*(xyz_LE_right_0 - repmat(xyz_LE_right_0(1,:),size(xyz_LE_right_0,1),1))')' + repmat(xyz_LE_right_0(1,:),size(xyz_LE_right_0,1),1);
 clear xyz_LE_right_0
 
 xyz_LE_left      = xyz_LE_right.*repmat([1 -1 1],size(xyz_LE_right,1),1);

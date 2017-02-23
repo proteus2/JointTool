@@ -75,11 +75,11 @@ if OUTFLAG==0
         varargout{3} = ConstraintLabel;
     end
 elseif OUTFLAG==1
-    varargout{1} = constantOut;
+    varargout{1} = constantOut{1};
     varargout{2} = lampar; 
     varargout{3} = stringer;
     varargout{4} = crossmod;
-    varargout{5} = statics;
+    varargout{5} = statics{1};
     varargout{6} = strain;
     if constant.opt.BucklConst
         varargout{7} = buckl;
