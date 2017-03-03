@@ -11,12 +11,11 @@ classdef strModelSettings
     
     methods
        function obj=strModelSettings() % constructor
-           obj.lin  = 0;
+           obj.lin  = 1;
            obj.grav = 0;
            obj.NLCC = 0.0001;
            obj.Fext = 0;
        end
-    end
-    
+    end 
 end
 

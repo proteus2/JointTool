@@ -3,7 +3,9 @@ function [statics] = calculateStiffness(constant,statics,ders,tailflag)
 % Extract parameters from structured arrays
 frdof = constant.str.frdof;
 
-fprintf('Calculate stiffness.\n')
+fprintf('\n')
+fprintf('--- Static Structure ---\n')
+fprintf('Calculate stiffness.')
 
 %=================================================================%
 % STIFFNESS CALCULATION

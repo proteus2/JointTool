@@ -7,17 +7,29 @@ classdef structuralModel
         settings = strModelSettings();
     end
     properties (Access = private)
+        M
+        K
         Ks
         Kfext
         frdof
         fxdof
         dFextdsc
+        cycles
+        eigvec
+        xDynHistory
+        xDotDynHistory
+        xDotDotDynHistory
     end
     methods % Constructor
         function obj = structuralModel(model)
-            [constant,~,~,~,statics] = genStrModel(model);
+            % Generate structural model
+            [constant,lampar,~,crossmod,statics] = genStrModel(model);
+            % Generate dynamic structural model
+            [dynamics] = genDynStrModel(constant,lampar,crossmod,statics,obj.settings.lin);
             % Extract properties
             obj.grid  = reshape(constant.str.xyz,3,constant.str.Ns+1)';
+            obj.M     = dynamics.Mfull;
+            obj.K     = dynamics.Kfull;
             obj.Ks    = statics.str.Ks;
             obj.Kfext = statics.str.Kfext;
             obj.Fs    = statics.str.Fs;
@@ -27,15 +39,18 @@ classdef structuralModel
             obj.fxdof = constant.str.fxdof;
             obj.fxdof = constant.str.fxdof;
             obj.dFextdsc = statics.sens.dFextdsc;
+            obj.cycles   = dynamics.cycles;
+            obj.eigvec   = dynamics.eigvec;
             % Save array
             curdir = cd;
             cd('ext/PROTEUS/results')
-            save('constant.mat','constant')
-            save('statics.mat','statics')
+            save constant constant
+            save statics statics
+            save dynamics dynamics
             cd(curdir)
         end
     end
-    methods % Solution
+    methods % Solution Methods
         function obj = solve(obj)
             % Format (Nx, Ny, Nz, Mx, My, Mz)_node
             % Assemble stiffness and forces
@@ -162,6 +177,65 @@ classdef structuralModel
                 obj.disp = statics.str.p;
             end
         end
+        function obj = initializeDynSimulation(obj,iniStrState)
+            Null = zeros(size(iniStrState(obj.frdof,1)));
+            obj.xDynHistory(:,1)       = iniStrState(obj.frdof,1);
+            obj.xDotDynHistory(:,2)    = Null;
+            obj.xDotDotDynHistory(:,3) = Null;
+        end
+        function obj = solveTimeStep(obj,F,t,dt)
+            
+            VisualCheck = 0;
+            
+            % Set newmark beta scheme parameters
+            beta  = 1/4;
+            gamma = 1/2;
+            % Init.
+            check      = obj.xDynHistory==0;
+            idx        = find(any(check),1); % Find the last time iteration
+            xNow       = obj.xDynHistory(:,idx);
+            xDotNow    = obj.xDotDynHistory(:,idx);
+            xDotDotNow = obj.xDotDotDynHistory(:,idx);
+            % Graphics settings
+            if VisualCheck
+                figure()
+                hold all
+            end
+            % Discrete time-integration scheme
+            for i = 1:length(t)
+                % Forces
+                Fi = F(obj.frdof,i);
+                % Mass matrix
+                mam = obj.M(obj.frdof,obj.frdof);
+                % Stiffness matrix
+                stm = obj.K(obj.frdof,obj.frdof);
+                % Structural damping (Rayleigh Model)
+                dam = stm*0.002 + mam*0.002;
+                
+                % Calculate x_nxt
+                xNxt = linsolve(mam + beta*dt^2*stm + gamma*dt*dam,...
+                                 beta*dt^2*Fi + mam*xNow + dt*mam*xDotNow + dt^2*mam*(1/2-beta)*xDotDotNow +...
+                                 dam*beta*dt^2*(gamma/(beta*dt)*xNow + (gamma/beta-1)*xDotNow + 1/2*dt*(gamma/beta-2)*xDotDotNow));
+                
+                xDotDotNxt = 1/(beta*dt^2)*(xNxt-xNow-dt*xDotNow-dt^2*(1/2-beta)*xDotDotNow);
+                xDotNxt    = xDotNow+dt*((1-gamma)*xDotDotNow+gamma*xDotDotNxt);
+                
+                % Update
+                xNow       = xNxt;
+                xDotNow    = xDotNxt;
+                xDotDotNow = xDotDotNxt;
+                
+                % Store
+                obj.xDynHistory(obj.frdof,i)       = xNxt;
+                obj.xDotDynHistory(obj.frdof,i)    = xDotNxt;
+                obj.xDotDotDynHistory(obj.frdof,i) = xDotDotNxt;
+                
+                % Graphics
+                if VisualCheck
+                   plot(obj.grid(:,2),obj.xDynHistory(3:6:end,i)) 
+                end
+            end
+        end
     end
     methods % Graphics
         function obj = plotGridVol(obj,varargin)
@@ -196,8 +270,8 @@ classdef structuralModel
             % Fish bones (visual aid for rotations)
             Null = zeros(constant.str.Ns+1,1);
             xref = constant.inp.xref;
-            LE = P0 + [xref   Null Null].*[C Null Null];
-            TE = P0 + [xref-1 Null Null].*[C Null Null];
+            LE = P0 - [xref   Null Null].*[C Null Null];
+            TE = P0 - [xref-1 Null Null].*[C Null Null];
             for i=1:constant.str.Ns+1
                 plot3([LE(i,1), P0(i,1)],...
                     [LE(i,2), P0(i,2)],...
@@ -253,6 +327,54 @@ classdef structuralModel
             zlabel('Height [m]')
             view(-50,25)
             axis equal
+        end
+        function obj = plotModes(obj)
+           load constant
+           load dynamics
+          
+           selectModes = 1:2:10;
+           
+           ome    = dynamics.eig;
+           vec    = dynamics.eigvec;
+           
+           for idx = selectModes
+               
+               figure()
+               obj.plotGrid();
+               
+               % Extract properties
+               P0 = obj.grid;
+               P  = zeros(size(obj.disp));
+               P(obj.frdof) = vec(:,idx) + vec(:,idx+1);
+               if size(P,2)==1
+                   P = reshape(P,6,constant.str.Ns+1)';
+               end
+               C  = constant.inp.cbox;
+               % Deformed beam axis
+               plot3(P0(:,1)+P(:,1),...
+                     P0(:,2)+P(:,2),...
+                     P0(:,3)+P(:,3),'ro-','LineWidth',2,'MarkerFaceColor',[1 0 0]);
+               % Fish bones (visual aid for rotations)
+               Null = zeros(constant.str.Ns+1,1);
+               LE =   0.5*[C Null Null];
+               TE = - 0.5*[C Null Null];
+               for i=1:constant.str.Ns+1
+                   R = expon(P(i,4:6));
+                   LErot = (R*LE(i,:)')' + P0(i,:) + P(i,1:3);
+                   TErot = (R*TE(i,:)')' + P0(i,:) + P(i,1:3);
+                   plot3([LErot(:,1), P0(i,1)+P(i,1)],...
+                       [LErot(:,2), P0(i,2)+P(i,2)],...
+                       [LErot(:,3), P0(i,3)+P(i,3)],'b.-');
+                   plot3([TErot(:,1), P0(i,1)+P(i,1)],...
+                       [TErot(:,2), P0(i,2)+P(i,2)],...
+                       [TErot(:,3), P0(i,3)+P(i,3)],'b.-');
+               end
+               
+               axis equal
+               
+               title(['Mode n.',num2str(idx),': Freq.',num2str(round(100*ome(idx)/2/pi)/100),'Hz'])
+           end
+           
         end
     end
 end

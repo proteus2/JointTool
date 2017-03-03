@@ -19,7 +19,6 @@ cd ext/PROTEUS/InputFiles
 [ModellingInput] = xlsread(xlsFileName,'ModellingInput');
 cd(curdir)
 
-LIN          = ModellingInput(12,1);                    % Flag for linear or non-linear, 1: Linear, 0: Non-linear
 TRIMDEF      = ModellingInput(13,1);                    % trimdef: 1: weight = general.weight+str_mass+non_str_mass; 2: weight = general.weight
 DERS         = ModellingInput(14,1);                    % set to 1 to calculate the derivative
 GRAV         = ModellingInput(15,1);                    % Gravity Y/N
@@ -47,17 +46,17 @@ dvinp.tail = constant.opt.dvFull;
 % Analysis or Optimisation
 if OUTFLAG == 0
     if DERS == 1
-        [obj,g,dobj,dg] = analysis_loadcase(constant,dvinp,ANALYSISTYPE,LIN,TRIMDEF,GRAV,DERS,OUTFLAG,loadcase);
+        [obj,g,dobj,dg] = analysis_loadcase(constant,dvinp,ANALYSISTYPE,TRIMDEF,GRAV,DERS,OUTFLAG,loadcase);
         [f0val,fval,df0dx,dfdx,ConstraintLabel] = PostProc(constant,loadcase,obj,g,dobj,dg);
     else
-        [obj,g] = analysis_loadcase(constant,dvinp,ANALYSISTYPE,LIN,TRIMDEF,GRAV,DERS,OUTFLAG,loadcase);
+        [obj,g] = analysis_loadcase(constant,dvinp,ANALYSISTYPE,TRIMDEF,GRAV,DERS,OUTFLAG,loadcase);
         [f0val,fval,~,~,ConstraintLabel] = PostProc(constant,loadcase,obj,g);
     end
 elseif OUTFLAG == 1
     if constant.opt.BucklConst
-        [constantOut,lampar,stringer,crossmod,statics,strain,buckl] = analysis_loadcase(constant,dvinp,ANALYSISTYPE,LIN,TRIMDEF,GRAV,DERS,OUTFLAG,loadcase);
+        [constantOut,lampar,stringer,crossmod,statics,strain,buckl] = analysis_loadcase(constant,dvinp,ANALYSISTYPE,TRIMDEF,GRAV,DERS,OUTFLAG,loadcase);
     else
-        [constantOut,lampar,stringer,crossmod,statics,strain] = analysis_loadcase(constant,dvinp,ANALYSISTYPE,LIN,TRIMDEF,GRAV,DERS,OUTFLAG,loadcase);
+        [constantOut,lampar,stringer,crossmod,statics,strain] = analysis_loadcase(constant,dvinp,ANALYSISTYPE,TRIMDEF,GRAV,DERS,OUTFLAG,loadcase);
     end
 end
 

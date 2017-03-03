@@ -1,4 +1,4 @@
-function [varargout] = analysis_crossmod(constant,lampar,crossmod,dvtot,Vi,dispi,alphai,ANALYSISTYPE,lin,trim,trimdef,grav,ders,feas,outflag,gustflag)
+function [varargout] = analysis_crossmod(constant,crossmod,dispi,alphai,ANALYSISTYPE,trim,trimdef,grav,ders,outflag)
 
 curdir = cd;
 
@@ -10,17 +10,6 @@ end
 if ANALYSISTYPE == 2 || ANALYSISTYPE == 3
     morphflag = 1;
 else
-    morphflag = 0;
-end
-
-if feas == 0
-    lin = 1;
-    if gustflag == 1
-        ngust = 6*length(constant.gust.H); % Number of time instances requested per gust
-    else
-        ngust = 1;
-    end
-    gustflag = 0;
     morphflag = 0;
 end
 
