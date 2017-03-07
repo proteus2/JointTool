@@ -2,13 +2,15 @@ classdef aeroModel
     %UNTITLED Summary of this class goes here
     %   Detailed explanation goes here
     
-    properties (Hidden) %hidden
+    properties %(Hidden) %hidden
         %Geometry class
         geometry
     end
-    properties (Access = private) % private
+    properties %(Access = private) % private
         %Vortex Lattice Kernel
         VLM
+        %Unsteady Vortex Lattice Kernel
+        UVLM
     end
     properties %public
         %Body grid for coupling
@@ -16,7 +18,7 @@ classdef aeroModel
         % aerodynamic state
         state
     end
-    properties (SetAccess = protected)%public protected
+    properties %(SetAccess = protected)%public protected
         %Undeformed body grid 
         grid
         %Forces in Body Fixed Frame
@@ -50,7 +52,7 @@ classdef aeroModel
         end
         function obj=set.state(obj,inState)
             obj.state=inState;
-             obj=obj.updateState(); %update kernel on set
+             obj=obj.updateState(); 
         end
     end
     methods %get
@@ -61,18 +63,35 @@ classdef aeroModel
     end
     methods
         function obj=solve(obj)
+            %initialize VLM kernel with gridDeflected
+            obj.VLM=class_VLM_solver(obj.geometry.grid_deflected,obj.geometry.te_idx, obj.geometry.panels,obj.state, obj.geometry.reference);
             %this function calculates the forces 
             obj.VLM=obj.VLM.f_solve_std;
             obj.F=obj.VLM.F_body;
         end
         function obj=updateGrid(obj)
             obj.geometry.grid_deflected=obj.gridDeflected;
-            %initialize VLM kernel with gridDeflected
-            obj.VLM=class_VLM_solver(obj.geometry.grid_deflected,obj.geometry.te_idx, obj.geometry.panels,obj.state, obj.geometry.reference);
+            
         end
         function obj=updateState(obj)
             %update VLM kernel with obj.state
             obj.VLM.state=obj.state;
+        end
+        function obj=initializeDynSimulation(obj, state,dt)
+            obj.geometry.grid_settings.wake=1;
+            obj.geometry=obj.geometry.compute_grid();            
+            UVLM_settings=class_UVLM_computation_settings();
+            UVLM_settings.debug=0;
+            UVLM_settings.movie=1;
+            UVLM_settings.wakelength_factor=1;
+            
+            obj.UVLM=class_UVLM_solver(obj.geometry.name,obj.geometry.grid,obj.geometry.is_te,obj.geometry.panels,state,obj.geometry.grid_wake,obj.geometry.panels_wake,obj.geometry.reference,UVLM_settings);
+            obj.UVLM=obj.UVLM.initialize_time_domain_solution(dt);
+            obj.F=obj.UVLM.F_body;
+        end
+        function obj=solveTimeStep(obj,state,i)
+             obj.UVLM=obj.UVLM.solve_time_domain_aerodynamics(obj.geometry,[0*[0 0 0]' ([-1 0 0;0 1 0; 0 0 -1]*[0 0 0]')],state.V_inf,state.alpha,0,[0 0 0],state.rho_air,i,['results/test']);
+             obj.F=obj.UVLM.F_body;
         end
     end
     methods %static

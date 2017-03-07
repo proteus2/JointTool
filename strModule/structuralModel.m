@@ -5,6 +5,9 @@ classdef structuralModel
         Fs
         Fext
         settings = strModelSettings();
+        xDynHistory
+        xDotDynHistory
+        xDotDotDynHistory
     end
     properties (Access = private)
         M
@@ -16,9 +19,6 @@ classdef structuralModel
         dFextdsc
         cycles
         eigvec
-        xDynHistory
-        xDotDynHistory
-        xDotDotDynHistory
     end
     methods % Constructor
         function obj = structuralModel(model)
@@ -179,9 +179,9 @@ classdef structuralModel
         end
         function obj = initializeDynSimulation(obj,iniStrState)
             Null = zeros(size(iniStrState(obj.frdof,1)));
-            obj.xDynHistory(:,1)       = iniStrState(obj.frdof,1);
-            obj.xDotDynHistory(:,2)    = Null;
-            obj.xDotDotDynHistory(:,3) = Null;
+            obj.xDynHistory(obj.frdof,1)       = iniStrState(obj.frdof,1);
+            obj.xDotDynHistory(obj.frdof,2)    = Null;
+            obj.xDotDotDynHistory(obj.frdof,3) = Null;
         end
         function obj = solveTimeStep(obj,F,t,dt)
             
@@ -193,9 +193,9 @@ classdef structuralModel
             % Init.
             check      = obj.xDynHistory==0;
             idx        = find(any(check),1); % Find the last time iteration
-            xNow       = obj.xDynHistory(:,idx);
-            xDotNow    = obj.xDotDynHistory(:,idx);
-            xDotDotNow = obj.xDotDotDynHistory(:,idx);
+            xNow       = obj.xDynHistory(obj.frdof,idx);
+            xDotNow    = obj.xDotDynHistory(obj.frdof,idx);
+            xDotDotNow = obj.xDotDotDynHistory(obj.frdof,idx);
             % Graphics settings
             if VisualCheck
                 figure()
@@ -235,6 +235,7 @@ classdef structuralModel
                    plot(obj.grid(:,2),obj.xDynHistory(3:6:end,i)) 
                 end
             end
+            obj.disp(obj.frdof)=xNxt;
         end
     end
     methods % Graphics

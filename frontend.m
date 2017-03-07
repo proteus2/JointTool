@@ -42,3 +42,18 @@ F  = rand(size(myStrModel.Fs,1),length(t)); % Random tip force (SIZE --> Fs x Nt
 myStrModel = myStrModel.initializeDynSimulation(myStrModel.disp); % Use myAE_sol.strModel.disp to initialize at static trim point.
 myStrModel_tsim = myStrModel.solveTimeStep(F,t,dt);
 
+%% dyn aero sim (start from rest)
+dt=0.0011;
+t=0:dt:0.2;
+initstate= class_aero_state(100, 0,   0,   0.0,   1.225);
+myAeroModel=myAeroModel.initializeDynSimulation(initstate,dt);
+
+for i=1:length(t)
+    myAeroModel=myAeroModel.solveTimeStep(state,i);  
+end
+
+%% aero struct dyn sim
+myAE = aeroElasticModeldAED(myAeroModel,myStrModel);
+%%
+state =class_aero_state(200, 10,   0,   0.0,   1.225);
+myAE = myAE.solveDynamic(state,zeros(366,1),0:0.01:1);

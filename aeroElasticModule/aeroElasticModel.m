@@ -38,6 +38,19 @@ classdef aeroElasticModel
                 err=max((Disp./prvDisp)-1);
              end
         end
+        function obj=solveDynamic(obj,initAeroState,initDisp,tVec)
+            dt=tVec(2)-tVec(1);
+            obj.strModel = obj.strModel.initializeDynSimulation(initDisp);
+            obj.aeroModel=obj.aeroModel.initializeDynSimulation(initAeroState,dt);
+            obj=obj.transformForces;
+            for i=1:length(tVec)
+                obj.strModel =  obj.strModel.solveTimeStep(obj.strModel.Fs,tVec(i),dt);
+                obj=obj.transformDisplacements;
+                obj.aeroModel=obj.aeroModel.solveTimeStep(initAeroState,i);  
+                obj=obj.transformForces;
+            end
+
+        end
         function obj=plotResults(obj)
             figure; 
             obj.aeroModel.plotGrid();
