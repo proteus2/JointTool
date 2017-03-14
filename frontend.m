@@ -3,6 +3,8 @@ clear all
 close all
 clc
 
+rehash path
+
 %% add required modules
 addpath(genpath('ext'))
 addpath(genpath('staticAeroModule'))
@@ -36,24 +38,23 @@ myStrModel = structuralModel('RecBeam');
 % myAE_linsol.plotResults
 
 %% Dynamic simulation
-t  = 0:100;
-dt = (t(end) - t(1))/length(t);
-F  = rand(size(myStrModel.Fs,1),length(t)); % Random tip force (SIZE --> Fs x Ntimesteps)
-myStrModel = myStrModel.initializeDynSimulation(myStrModel.disp); % Use myAE_sol.strModel.disp to initialize at static trim point.
-myStrModel_tsim = myStrModel.solveTimeStep(F,t,dt);
+% t  = 0:1:10;
+% dt = mean(diff(t));
+% F  = 10000*rand(size(myStrModel.Fs,1),length(t)); % Random tip force (SIZE --> Fs x Ntimesteps)
+% myStrModel = myStrModel.initializeDynSimulation(myStrModel.disp,t); % Use myAE_sol.strModel.disp to initialize at static trim point.
+% myStrModel_tsim = myStrModel.solveDynamics(F,t,dt);
 
 %% dyn aero sim (start from rest)
-dt=0.0011;
-t=0:dt:0.2;
-initstate= class_aero_state(100, 0,   0,   0.0,   1.225);
-myAeroModel=myAeroModel.initializeDynSimulation(initstate,dt);
+% dt=0.0011;
+% t=0:dt:0.2;
+% initstate= class_aero_state(100, 0,   0,   0.0,   1.225);
+% myAeroModel=myAeroModel.initializeDynSimulation(initstate,dt);
+% 
+% for i=1:length(t)
+%     myAeroModel=myAeroModel.solveTimeStep(state,i);  
+% end
 
-for i=1:length(t)
-    myAeroModel=myAeroModel.solveTimeStep(state,i);  
-end
-
-%% aero struct dyn sim
+%% aeroelastic dyn sim
 myAE = aeroElasticModeldAED(myAeroModel,myStrModel);
-%%
-state =class_aero_state(200, 10,   0,   0.0,   1.225);
-myAE = myAE.solveDynamic(state,zeros(366,1),0:0.01:1);
+state = class_aero_state(100, 10,   0,   0.0,   1.225);
+myAE_tsim  = myAE.solveDynamic(state,zeros(366,1),0:1:10);

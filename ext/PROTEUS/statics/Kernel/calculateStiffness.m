@@ -5,7 +5,7 @@ frdof = constant.str.frdof;
 
 fprintf('\n')
 fprintf('--- Static Structure ---\n')
-fprintf('Calculate stiffness.')
+fprintf('Calculate stiffness')
 
 %=================================================================%
 % STIFFNESS CALCULATION

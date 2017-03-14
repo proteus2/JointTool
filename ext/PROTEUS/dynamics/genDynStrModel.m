@@ -1,4 +1,10 @@
-function [dynamics] = genDynStrModel(constant,lampar,crossmod,statics,lin)
+function [dynamics] = genDynStrModel(constant,lampar,crossmod,statics,lin,varargin)
+
+if ~isempty(varargin)
+   echoflag = varargin{1};
+else
+   echoflag = 1; 
+end
 
 % Set flags
 feas = 1;
@@ -99,9 +105,11 @@ str.Nnode = str.Nel+1;
 cd('ext/PROTEUS/dynamics/structure')
 [str] = strorien(str,sens,lin);
 
-fprintf('\n')
-fprintf('--- Dynamic Structure ---\n')
-fprintf('Calculate mass matrix\n')
+if echoflag
+    fprintf('\n')
+    fprintf('--- Dynamic Structure ---\n')
+    fprintf('Calculate mass matrix\n')
+end
 [str] = dstmam(str,constant,sens,tailflag);
 
 if sens == 1
@@ -124,7 +132,9 @@ if sens == 1
     end
 end
 
-fprintf('Assemble structural state space\n')
+if echoflag
+    fprintf('Assemble structural state space\n')
+end
 [str] = dstrss_parfor(str,sens,tailflag);
 cd(curdir)
 
