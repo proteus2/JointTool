@@ -189,10 +189,10 @@ classdef structuralModel
         end
         function obj = solveDynamics(obj,F,t,dt)
             % Activate plot functions for debugging purposes
-            VisualCheck = 1;
+            VisualCheck = 0;
             % Time-loop
             for i=1:length(t)
-               obj = obj.solveTimeStep(F(:,i),t(i),dt); 
+               obj = obj.solveTimeStep(F(:,i),dt,i); 
                 % Graphics
                 if VisualCheck
                     hold all
@@ -200,7 +200,7 @@ classdef structuralModel
                 end
             end
         end
-        function obj = solveTimeStep(obj,F,t,dt)
+        function obj = solveTimeStep(obj,F,dt,iter)
            
             % Set newmark beta scheme parameters
             beta  = 1/4;
@@ -218,188 +218,88 @@ classdef structuralModel
                 %=========================================================%
                 % Mass matrix
                 mam = obj.M(obj.frdof,obj.frdof);
+                %=========================================================%
                 % Stiffness matrix
                 stm = obj.K(obj.frdof,obj.frdof);
+                %=========================================================%
                 % Structural damping (Rayleigh Model)
                 dam = stm*0.002 + mam*0.002;
+                %=========================================================%
                 % Forces
                 Fti = F(obj.frdof);
-                
-                % Calculate x_nxt
+                %=========================================================%
+                % Calculate states
                 xNxt = linsolve(mam + beta*dt^2*stm + gamma*dt*dam,...
-                    beta*dt^2*Fti + mam*xNow + dt*mam*xDotNow + dt^2*mam*(1/2-beta)*xDotDotNow +...
+                    beta*dt^2*Fti + mam*(xNow + dt*xDotNow + dt^2*(1/2-beta)*xDotDotNow) +...
                     dam*beta*dt^2*(gamma/(beta*dt)*xNow + (gamma/beta-1)*xDotNow + 1/2*dt*(gamma/beta-2)*xDotDotNow));
                 
                 xDotDotNxt = 1/(beta*dt^2)*(xNxt-xNow-dt*xDotNow-dt^2*(1/2-beta)*xDotDotNow);
                 xDotNxt    = xDotNow+dt*((1-gamma)*xDotDotNow+gamma*xDotDotNxt);
-                
+                %=========================================================%
                 % Store
                 obj.xDynHistory(obj.frdof,idx+1)       = xNxt;
                 obj.xDotDynHistory(obj.frdof,idx+1)    = xDotNxt;
                 obj.xDotDotDynHistory(obj.frdof,idx+1) = xDotDotNxt;
-                
+                %=========================================================%
                 obj.disp(obj.frdof)=xNxt;
             else
                 %=========================================================%
                 % NON-LINEAR STRUCTURAL SOLUTION
                 %=========================================================%
-                % Settings Newton-Raphson Method
-                sc   = 0;
-                Find = 0;
-                Fi   = 0;
-                Ff   = max(abs(F(3:6:end)));
-                % Apply force at once.
-                dsc  = 1;
-                % Apply force in steps;
-%                 if Fi == Ff && Ff == 0
-%                     dsc = 0.25;
-%                 else
-%                     if Fi == Ff
-%                         deltaF = min(1,0.1*Ff);
-%                         Fi = Ff-deltaF;
-%                     end
-%                     if Ff>Fi
-%                         step = ceil(4*(Ff-Fi)/Ff);
-%                     else
-%                         step = ceil(4*(Fi-Ff)/Fi);
-%                     end
-%                     dsc = 1/step;
-%                 end
-                count    = 0;
-                exitflag = 0;
-                tol1     = 1e-7; % Inner loop tolerance
-                tol2     = 1e-4; % Outer loop tolerance
-                fprintf('t [s]    iter    Force [N]      Tip T3 displacement [m]     check\n')
-                %=====================================================%
                 % Load structure arrays
                 load constant
-                load statics
+                if iter==1
+                    load statics
+                else
+                    load statics_sym
+                end
                 load dynamics
                 load crossmod
                 load lampar
-                %=====================================================%
-                % Solve structural equation
-                while (sc<1)
-                    % Initiate Newton-Raphson
-                    count = count + 1;
-                    Find  = Find + 1;
-                    sc    = sc + dsc;
-                    Fsq   = Fi^2 + sc*(Ff^2 - Fi^2);
-                    Fc    = sqrt(Fsq);
-                    if sc>1
-                        Fc = Ff;
-                        sc = 1;
-                    end
-                    check = 1;
-                    iter = 0;
-                    % Init. dold
-                    dold = statics.str.p;
-                    %=================================================%
-                    % Predictor step
-                    %=================================================%
-                    % Forces
-                    Fti = 0*statics.str.Fs(obj.frdof,1) + (Fc/Ff)*F(obj.frdof);
-                    % Mass matrix
-                    mam = obj.M(obj.frdof,obj.frdof);
-                    % Stiffness matrix
-                    stm = statics.str.Ks(obj.frdof,obj.frdof);
-                    % Structural damping (Rayleigh Model)
-                    dam = stm*0.002 + mam*0.002;
-                    % Estimate xNxt
-                    xNxt = linsolve(mam + beta*dt^2*stm + gamma*dt*dam,...
-                        beta*dt^2*Fti + mam*xNow + dt*mam*xDotNow + dt^2*mam*(1/2-beta)*xDotDotNow +...
-                        dam*beta*dt^2*(gamma/(beta*dt)*xNow + (gamma/beta-1)*xDotNow + 1/2*dt*(gamma/beta-2)*xDotDotNow));
-                    statics.str.p(obj.frdof,1) = xNxt;
-                    %=================================================%
-                    % Start inner loop
-                    %=================================================%
-                    while (check>tol1)
-                        iter = iter + 1;
-                        curdir = cd;
-                        %=============================================%
-                        % Update stiffness matrix
-                        %=============================================%
-                        cd('ext/PROTEUS/statics/Kernel')
-                        statics = structure(constant,statics,0,1,0,0);
-                        statics = pgen_str(constant,statics,0,0);
-                        statics = fext(constant,statics,sc,0,0,1,statics.str.alpha,0);
-                        cd(curdir)
-                        %=============================================%
-                        % Update forces
-                        %=============================================%
-                        if ~obj.settings.Fext
-                            Fti = (Fc/Ff)*F(obj.frdof) - statics.str.Fs(obj.frdof,1);
-                            stm = statics.str.Ks(obj.frdof,obj.frdof);
-                        else
-                            Fti = (Fc/Ff)*F(obj.frdof) + statics.str.Fext(obj.frdof,1) - statics.str.Fs(obj.frdof,1);
-                            stm = statics.str.Ks(obj.frdof,obj.frdof) - statics.str.Kfext(obj.frdof,obj.frdof);
-                        end
-                        %=============================================%
-                        % Update mass matrix
-                        %=============================================%
-                        [dynamics] = genDynStrModel(constant,lampar,crossmod,statics,obj.settings.lin,0);
-                        mam = dynamics.M;
-                        %=============================================%
-                        % Rayleigh Damping Update
-                        %=============================================%
-                        dam = 0*stm*0.002 + 0*mam*0.002;
-                        %=============================================%
-                        dd = linsolve(mam + beta*dt^2*stm + gamma*dt*dam,...
-                            beta*dt^2*Fti + mam*xNow + dt*mam*xDotNow + dt^2*mam*(1/2-beta)*xDotDotNow +...
-                            dam*beta*dt^2*(gamma/(beta*dt)*xNow + (gamma/beta-1)*xDotNow + 1/2*dt*(gamma/beta-2)*xDotDotNow));
-                        statics.str.p(obj.frdof,1) = statics.str.p(obj.frdof,1) + dd;
-                        xNxt = xNxt + dd;
-                        %=============================================%
-                        check = norm(dd,inf)/norm(xNxt,inf);
-                        %=============================================%
-                        if iter>20
-                            obj.disp = dold;
-                            sc = sc - dsc;
-                            dsc = dsc/2;
-                            fprintf('Reducing step size to %5.3e \n',dsc)
-                            sc = sc + dsc;
-                            Fsq = Fi^2 + sc*(Ff^2 - Fi^2);
-                            Fc = sqrt(Fsq);
-                            iter = 0;
-                        end
-                        if abs(dsc)<tol2
-                            fprintf('Step size too small, no solution found \n')
-                            check = 1E-9;
-                            exitflag = 1;
-                        end
-                    end
-                    % End inner loop
-                    fprintf(' %3.1f     %2i       %3.1f              %5.3f              %4.2e',t,iter,Fc,xNxt(end-3),check)
-                    fprintf('\n')
-                    % Adapt step size beased on convergence
-                    if iter<3 && exitflag~=1 && sc~=1
-                        dsc = 2*dsc;
-                        fprintf('Great convergence, increasing step size to %5.3e \n',dsc)
-                    elseif iter>8 && sc~=1
-                        dsc = 0.5*dsc;
-                        fprintf('Descreasing step size to %5.3e \n',dsc)
-                    end
-                    % Exit the loop if no solution if found
-                    if exitflag == 1
-                        break
-                    end
+                %=========================================================%
+                % Mass matrix
+                mam = obj.M(obj.frdof,obj.frdof);
+                %=========================================================%
+                % Update stiffness matrix
+                sc = 1; % Force is applied at once.
+                curdir = cd;
+                cd('ext/PROTEUS/statics/Kernel')
+                statics = structure(constant,statics,0,1,0,0);
+                statics = pgen_str(constant,statics,0,0);
+                statics = fext(constant,statics,sc,0,0,1,statics.str.alpha,0);
+                cd(curdir)
+                %=========================================================%
+                % Update forces
+                if ~obj.settings.Fext
+                    Fti = F(obj.frdof);
+                    stmNxt = statics.str.Ks(obj.frdof,obj.frdof);
+                else
+                    Fti = F(obj.frdof) + statics.str.Fext(obj.frdof,1);
+                    stmNxt = statics.str.Ks(obj.frdof,obj.frdof) - statics.str.Kfext(obj.frdof,obj.frdof);
                 end
-                %=====================================================%
+                %=========================================================%
+                % Damping
+                dam = stmNxt*0.002 + mam*0.002;
+                %=========================================================%
+                % Calculate states
+                xNxt = linsolve(mam + beta*dt^2*stmNxt + gamma*dt*dam,...
+                    beta*dt^2*Fti + mam*(xNow + dt*xDotNow + dt^2*(1/2-beta)*xDotDotNow) +...
+                    dam*beta*dt^2*(gamma/(beta*dt)*xNow + (gamma/beta-1)*xDotNow + 1/2*dt*(gamma/beta-2)*xDotDotNow));
+                %=========================================================%
                 % Calculate derivatives
                 xDotDotNxt = 1/(beta*dt^2)*(xNxt-xNow-dt*xDotNow-dt^2*(1/2-beta)*xDotDotNow);
                 xDotNxt    = xDotNow+dt*((1-gamma)*xDotDotNow+gamma*xDotDotNxt);
-                %=====================================================%
+                %=========================================================%
                 % Store
                 obj.xDynHistory(obj.frdof,idx+1)       = xNxt;
                 obj.xDotDynHistory(obj.frdof,idx+1)    = xDotNxt;
                 obj.xDotDotDynHistory(obj.frdof,idx+1) = xDotDotNxt;
-                %=====================================================%
+                %=========================================================%
                 % Update results
-                obj.disp(obj.frdof)=xNxt;
+                obj.disp(obj.frdof) = xNxt;
                 curdir = cd;
                 cd('ext/PROTEUS/results')
-                save constant constant
-                save statics statics
+                save statics_sym statics
                 cd(curdir)
             end
         end

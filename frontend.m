@@ -37,12 +37,17 @@ myStrModel = structuralModel('RecBeam');
 % myAE_linsol = myAE_linsol.solve;
 % myAE_linsol.plotResults
 
+return
+
 %% Dynamic simulation
-% t  = 0:1:10;
+% t  = 0:1E-3:10*1E-3;
 % dt = mean(diff(t));
-% F  = 10000*rand(size(myStrModel.Fs,1),length(t)); % Random tip force (SIZE --> Fs x Ntimesteps)
-% myStrModel = myStrModel.initializeDynSimulation(myStrModel.disp,t); % Use myAE_sol.strModel.disp to initialize at static trim point.
-% myStrModel_tsim = myStrModel.solveDynamics(F,t,dt);
+% % F  = 10000*rand(size(myStrModel.Fs,1),length(t)); % Random force (SIZE --> Fs x Ntimesteps)
+% F = zeros(size(myStrModel.Fs,1),length(t));
+% F(3,:)     = 1E6*sin(10*pi*t + 1); % Sinusoidal tip force
+% F(end-3,:) = 1E6*sin(10*pi*t + 1); % Sinusoidal tip force
+% myStrModel_tsim = myStrModel.initializeDynSimulation(myStrModel.disp,t); % Use myAE_sol.strModel.disp to initialize at static trim point.
+% myStrModel_tsim = myStrModel_tsim.solveDynamics(F,t,dt);
 
 %% dyn aero sim (start from rest)
 % dt=0.0011;
@@ -57,4 +62,4 @@ myStrModel = structuralModel('RecBeam');
 %% aeroelastic dyn sim
 myAE = aeroElasticModeldAED(myAeroModel,myStrModel);
 state = class_aero_state(100, 10,   0,   0.0,   1.225);
-myAE_tsim  = myAE.solveDynamic(state,zeros(366,1),0:1:10);
+myAE_tsim  = myAE.solveDynamic(state,zeros(366,1),0:1E-3:1);

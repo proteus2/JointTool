@@ -44,7 +44,7 @@ classdef aeroElasticModel
             obj.aeroModel=obj.aeroModel.initializeDynSimulation(initAeroState,dt);
             obj=obj.transformForces;
             for i=1:length(tVec)
-                obj.strModel =  obj.strModel.solveTimeStep(obj.strModel.Fs,tVec(i),dt);
+                obj.strModel =  obj.strModel.solveTimeStep(obj.strModel.Fs,dt,i);
                 obj=obj.transformDisplacements;
                 obj.aeroModel=obj.aeroModel.solveTimeStep(initAeroState,i);  
                 obj=obj.transformForces;
