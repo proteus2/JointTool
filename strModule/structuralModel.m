@@ -202,6 +202,10 @@ classdef structuralModel
         end
         function obj = solveTimeStep(obj,F,dt,iter)
            
+            % Activate plots for visual checks
+            VisualCheck = 0;
+            % N.B: iter is only used for plots.
+            
             % Set newmark beta scheme parameters
             beta  = 1/4;
             gamma = 1/2;
@@ -248,43 +252,38 @@ classdef structuralModel
                 %=========================================================%
                 % Load structure arrays
                 load constant
-                if iter==1
-                    load statics
-                else
-                    load statics_sym
-                end
-                load dynamics
-                load crossmod
-                load lampar
+                load statics
+                %=========================================================%
+                % Initialize
+                statics_sym = statics;
                 %=========================================================%
                 % Mass matrix
                 mam = obj.M(obj.frdof,obj.frdof);
+                %=========================================================%
+                % Initialize displacement
+                xNxt = xNow;
                 %=========================================================%
                 % Update stiffness matrix
                 sc = 1; % Force is applied at once.
                 curdir = cd;
                 cd('ext/PROTEUS/statics/Kernel')
-                statics = structure(constant,statics,0,1,0,0);
-                statics = pgen_str(constant,statics,0,0);
-                statics = fext(constant,statics,sc,0,0,1,statics.str.alpha,0);
+                statics_sym.str.p(obj.frdof) = xNxt;
+                statics_sym = structure(constant,statics_sym,0,1,0,0);
+                statics_sym = pgen_str(constant,statics_sym,0,0);
+                statics_sym = fext(constant,statics_sym,sc,0,0,1,statics_sym.str.alpha,0);
                 cd(curdir)
                 %=========================================================%
-                % Update forces
-                if ~obj.settings.Fext
-                    Fti = F(obj.frdof);
-                    stmNxt = statics.str.Ks(obj.frdof,obj.frdof);
-                else
-                    Fti = F(obj.frdof) + statics.str.Fext(obj.frdof,1);
-                    stmNxt = statics.str.Ks(obj.frdof,obj.frdof) - statics.str.Kfext(obj.frdof,obj.frdof);
-                end
-                %=========================================================%
-                % Damping
-                dam = stmNxt*0.002 + mam*0.002;
-                %=========================================================%
-                % Calculate states
-                xNxt = linsolve(mam + beta*dt^2*stmNxt + gamma*dt*dam,...
-                    beta*dt^2*Fti + mam*(xNow + dt*xDotNow + dt^2*(1/2-beta)*xDotDotNow) +...
-                    dam*beta*dt^2*(gamma/(beta*dt)*xNow + (gamma/beta-1)*xDotNow + 1/2*dt*(gamma/beta-2)*xDotDotNow));
+                % Update stiffness
+                stm = statics_sym.str.Ks(obj.frdof,obj.frdof);
+                dam = 0.002*mam + 0.002*stm;
+                Fti = F(obj.frdof);
+                % Equivalent stiffness
+                Kbar = 1/beta/dt^2*mam + gamma/beta/dt*dam + stm;
+                Pbar = Fti - statics_sym.str.Fs(obj.frdof) + ...
+                       mam*(1/beta/dt*xDotNow + (1-2*beta)/2/beta*xDotDotNow) + ...
+                       dam*((gamma-beta)/beta*xDotNow + dt*(gamma-2*beta)/2/beta*xDotDotNow);
+                dd = Kbar\Pbar;
+                xNxt = xNxt + dd;
                 %=========================================================%
                 % Calculate derivatives
                 xDotDotNxt = 1/(beta*dt^2)*(xNxt-xNow-dt*xDotNow-dt^2*(1/2-beta)*xDotDotNow);
@@ -297,10 +296,13 @@ classdef structuralModel
                 %=========================================================%
                 % Update results
                 obj.disp(obj.frdof) = xNxt;
-                curdir = cd;
-                cd('ext/PROTEUS/results')
-                save statics_sym statics
-                cd(curdir)
+                if VisualCheck
+                    figure(1)
+                    hold on
+                    plot(obj.grid(:,2),statics_sym.str.p(3:6:end))
+                    title([num2str(iter),'/',num2str(1/dt+1)])
+                    pause(0.5)
+                end
             end
         end
     end
